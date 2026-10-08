@@ -1,0 +1,88 @@
+"use client";
+
+import { Activity } from "lucide-react";
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { useReducedMotion } from "framer-motion";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAnalytics } from "@/components/dashboard/analytics-context";
+import { cn } from "@/lib/utils";
+
+const tooltipStyle = { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12, color: "var(--ink)", boxShadow: "var(--shadow-lift)", fontVariantNumeric: "tabular-nums" };
+const axisTick = { fill: "var(--faint)", fontSize: 12, fontVariantNumeric: "tabular-nums" } as const;
+
+function ChartState({ loading, message, className }: { loading: boolean; message?: string; className?: string }) {
+  const { data } = useAnalytics();
+  const fallback = data?.live ? "Meta returned no data for the connected accounts in the last 28 days." : "Connect Meta to load live analytics.";
+  const copy = loading ? "Loading live Meta analytics…" : (message ?? fallback);
+  return (
+    <div role="status" aria-live="polite" className={cn("grid min-h-[180px] w-full place-items-center rounded-xl border border-dashed border-borderSoft bg-surface/50 px-6 text-center text-xs leading-relaxed text-mutedText", className)}>
+      <div className="flex max-w-[28ch] flex-col items-center gap-2">
+        {!loading && <span aria-hidden="true" className="grid h-8 w-8 place-items-center rounded-full border border-borderSoft bg-card text-primary"><Activity className="h-4 w-4" /></span>}
+        <span>{copy}</span>
+      </div>
+    </div>
+  );
+}
+
+export function EngagementChartCard() {
+  const { data, loading } = useAnalytics();
+  const reduceMotion = useReducedMotion();
+  const chartData = data?.engagementData ?? [];
+  return <Card className="lg:col-span-2"><CardHeader><CardTitle>Engagement over time</CardTitle><CardDescription>Daily activity returned by the Meta Graph API.</CardDescription></CardHeader><CardContent>{loading || chartData.length === 0 ? <ChartState loading={loading} /> : <div role="img" aria-label={`Area chart of daily engagement over the last ${chartData.length} days, with a comments overlay line.`} className="h-[280px]"><ResponsiveContainer width="100%" height="100%"><AreaChart data={chartData}><defs><linearGradient id="engagement" x1="0" x2="0" y1="0" y2="1"><stop offset="5%" stopColor="var(--accent)" stopOpacity={0.28} /><stop offset="95%" stopColor="var(--accent)" stopOpacity={0.02} /></linearGradient></defs><CartesianGrid stroke="var(--line)" strokeOpacity={0.5} vertical={false} /><XAxis dataKey="label" axisLine={false} tickLine={false} tick={axisTick} /><YAxis hide /><Tooltip contentStyle={tooltipStyle} cursor={{ stroke: "var(--line)" }} /><Area animationDuration={900} isAnimationActive={!reduceMotion} dataKey="engagement" fill="url(#engagement)" stroke="var(--accent)" strokeWidth={2.5} type="monotone" /><Line animationDuration={1000} isAnimationActive={!reduceMotion} dataKey="comments" dot={false} stroke="var(--ok)" strokeWidth={2} /></AreaChart></ResponsiveContainer></div>}</CardContent></Card>;
+}
+
+export function PostingFrequencyCard() {
+  const { data, loading } = useAnalytics();
+  const reduceMotion = useReducedMotion();
+  const chartData = data?.postingData ?? [];
+  return <Card><CardHeader><CardTitle>Published posts</CardTitle><CardDescription>Recent posts returned by Meta, split by platform.</CardDescription></CardHeader><CardContent>{loading || chartData.length === 0 ? <ChartState loading={loading} /> : <div role="img" aria-label={`Bar chart of recent posts across ${chartData.length} platforms.`} className="h-[220px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={chartData}><CartesianGrid stroke="var(--line)" strokeOpacity={0.5} vertical={false} /><XAxis dataKey="label" axisLine={false} tickLine={false} tick={axisTick} /><YAxis hide /><Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--accent-soft)" }} /><Bar animationDuration={800} isAnimationActive={!reduceMotion} dataKey="value" fill="var(--accent)" radius={[6, 6, 2, 2]} /></BarChart></ResponsiveContainer></div>}</CardContent></Card>;
+}
+
+export function AudienceGrowthCard() {
+  const { data, loading } = useAnalytics();
+  const reduceMotion = useReducedMotion();
+  const chartData = data?.growthData ?? [];
+  return <Card><CardHeader><CardTitle>Audience size</CardTitle><CardDescription>Latest follower counts returned per connected account.</CardDescription></CardHeader><CardContent>{loading || chartData.length === 0 ? <ChartState loading={loading} message="Meta did not return follower counts for the connected accounts." /> : <div role="img" aria-label={`Bar chart comparing audience size across ${chartData.length} connected accounts.`} className="h-[220px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={chartData}><CartesianGrid stroke="var(--line)" strokeOpacity={0.5} vertical={false} /><XAxis dataKey="label" axisLine={false} tickLine={false} tick={axisTick} /><YAxis hide /><Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--accent-soft)" }} /><Bar animationDuration={900} isAnimationActive={!reduceMotion} dataKey="followers" fill="var(--ok)" radius={[6, 6, 2, 2]} /></BarChart></ResponsiveContainer></div>}</CardContent></Card>;
+}
+
+export function SentimentTrendCard() {
+  const { data, loading } = useAnalytics();
+  const reduceMotion = useReducedMotion();
+  const chartData = data?.sentimentData ?? [];
+  return <Card><CardHeader><CardTitle>Sentiment trend</CardTitle><CardDescription>Available when comment-level sentiment data is connected.</CardDescription></CardHeader><CardContent>{loading || chartData.length === 0 ? <ChartState loading={loading} message="Meta analytics does not include sentiment by default." /> : <div role="img" aria-label={`Area chart of comment sentiment over ${chartData.length} periods.`} className="h-[220px]"><ResponsiveContainer width="100%" height="100%"><AreaChart data={chartData}><defs><linearGradient id="sentiment" x1="0" x2="0" y1="0" y2="1"><stop offset="5%" stopColor="var(--ok)" stopOpacity={0.3} /><stop offset="95%" stopColor="var(--ok)" stopOpacity={0.02} /></linearGradient></defs><XAxis dataKey="label" axisLine={false} tickLine={false} tick={axisTick} /><YAxis hide /><Tooltip contentStyle={tooltipStyle} cursor={{ stroke: "var(--line)" }} /><Area animationDuration={900} isAnimationActive={!reduceMotion} dataKey="score" fill="url(#sentiment)" stroke="var(--ok)" strokeWidth={2.5} type="monotone" /></AreaChart></ResponsiveContainer></div>}</CardContent></Card>;
+}
+
+export function PlatformBreakdownCard({ className }: { className?: string } = {}) {
+  const { data, loading } = useAnalytics();
+  const reduceMotion = useReducedMotion();
+  const chartData = data?.platformBreakdown ?? [];
+  const colors = ["var(--accent)", "var(--ok)", "var(--warn)", "var(--muted)"];
+  if (loading || chartData.length === 0) return <ChartState loading={loading} className={className} />;
+  return (
+    <div className={cn("flex w-full min-w-0 flex-col items-center gap-5 sm:flex-row sm:items-center", className)}>
+      <div role="img" aria-label={`Pie chart: share of engagement across ${chartData.map((p) => p.name).join(", ")}.`} className="h-[176px] w-[176px] shrink-0 sm:h-[168px] sm:w-[168px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie animationDuration={900} isAnimationActive={!reduceMotion} cx="50%" cy="50%" data={chartData} dataKey="value" innerRadius={46} outerRadius={70} paddingAngle={4}>
+              {chartData.map((entry, index) => (
+                <Cell fill={colors[index % colors.length]} key={entry.name} stroke="var(--surface)" strokeWidth={1} />
+              ))}
+            </Pie>
+            <Tooltip contentStyle={tooltipStyle} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="grid w-full min-w-0 flex-1 gap-2.5">
+        {chartData.map((platform, index) => (
+          <div className="flex min-w-0 items-center justify-between gap-3 rounded-xl border border-borderSoft/60 bg-surface/60 px-3 py-2.5 text-sm" key={platform.name}>
+            <span className="flex min-w-0 items-center gap-2.5 text-mutedText">
+              <span aria-hidden="true" className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: colors[index % colors.length] }} />
+              <span className="truncate text-[13px] font-medium leading-none">{platform.name}</span>
+            </span>
+            <strong className="shrink-0 tabular-nums text-sm font-semibold text-ink">{new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 }).format(platform.value)}%</strong>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

@@ -1,22 +1,56 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
-import { BookOpen, Brain, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
+import { Check, Gauge } from "lucide-react";
+import { AuroraBackdrop } from "@/components/ui/aurora-backdrop";
 
+/**
+ * Decorative scene behind the auth card. The two floating instruments are
+ * hidden until there is real margin beside the layout, and the whole layer is
+ * removed from the accessibility tree.
+ */
 export function AuthBackground() {
-  const reduceMotion = useReducedMotion();
-
   return (
-    <div aria-hidden="true" className="auth-scene">
-      <motion.div className="auth-orb auth-orb-one" animate={reduceMotion ? undefined : { x: [0, 30, -18, 0], y: [0, -22, 18, 0], scale: [1, 1.08, 0.96, 1] }} transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }} />
-      <motion.div className="auth-orb auth-orb-two" animate={reduceMotion ? undefined : { x: [0, -26, 16, 0], y: [0, 22, -14, 0], scale: [1, 0.94, 1.08, 1] }} transition={{ duration: 19, repeat: Infinity, ease: "easeInOut" }} />
-      <div className="auth-planet">
-        <motion.div className="auth-planet-core" animate={reduceMotion ? undefined : { rotate: 360 }} transition={{ duration: 28, repeat: Infinity, ease: "linear" }}><Sparkles className="h-7 w-7" /></motion.div>
-        <span className="auth-planet-ring auth-planet-ring-one" />
-        <span className="auth-planet-ring auth-planet-ring-two" />
-      </div>
-      <motion.div className="auth-float-card auth-float-card-one" animate={reduceMotion ? undefined : { y: [0, -10, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}><Brain className="h-4 w-4 text-primary" /><span>Audience memory</span></motion.div>
-      <motion.div className="auth-float-card auth-float-card-two" animate={reduceMotion ? undefined : { y: [0, 10, 0] }} transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}><BookOpen className="h-4 w-4 text-success" /><span>Learn from every signal</span></motion.div>
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+      <AuroraBackdrop />
+
+      <motion.div
+        animate={{ y: [0, -10, 0] }}
+        className="aurora-glass absolute left-[4.5%] top-[21%] hidden w-56 p-4 2xl:block"
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <div className="flex items-center justify-between gap-2">
+          <p className="aurora-label">Readiness</p>
+          <Gauge className="h-4 w-4 text-primary" />
+        </div>
+        <p className="mt-2 font-display text-3xl font-semibold tracking-[-0.05em] text-ink">
+          63<span className="ml-1 font-sans text-xs font-normal tracking-normal text-faintText">/ 100</span>
+        </p>
+        <p className="mt-0.5 text-[11px] text-mutedText">Data Analyst · weighted</p>
+        <div className="aurora-meter mt-3">
+          <div className="aurora-meter-fill" style={{ width: "63%" }} />
+        </div>
+      </motion.div>
+
+      <motion.div
+        animate={{ y: [0, 9, 0] }}
+        className="aurora-glass absolute right-[4.5%] bottom-[23%] hidden w-60 p-4 2xl:block"
+        transition={{ duration: 9.5, delay: 0.6, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <p className="aurora-label">Matched skill</p>
+        <div className="mt-2.5 flex items-center gap-2.5">
+          <span className="grid h-8 w-8 place-items-center rounded-lg bg-[var(--accent-soft)] text-primary">
+            <Check className="h-4 w-4" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-ink">SQL</p>
+            <p className="text-[10px] text-mutedText">Confident · 25% weight</p>
+          </div>
+        </div>
+        <p className="mt-3 border-t border-[var(--aurora-glass-edge)] pt-2.5 text-[11px] leading-4 text-mutedText">
+          One project linked as evidence.
+        </p>
+      </motion.div>
     </div>
   );
 }

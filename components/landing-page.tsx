@@ -1,61 +1,455 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowRight, ArrowUpRight, BookOpenCheck, BriefcaseBusiness, Check, ChevronDown, Compass, GraduationCap, Layers3, Menu, Target, X } from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
-import Image from "next/image";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  BookOpenCheck,
+  CalendarRange,
+  Check,
+  Compass,
+  FolderKanban,
+  Layers3,
+  LockKeyhole,
+  Menu,
+  Plus,
+  Sigma,
+  Target,
+  TrendingUp,
+  X
+} from "lucide-react";
+import { BrandMark } from "@/components/ui/brand-mark";
+import { AuroraBackdrop } from "@/components/ui/aurora-backdrop";
+import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { ThemeToggle } from "@/components/providers/theme-toggle";
 import { LandingMobileDock } from "@/components/ui/mobile-bottom-nav";
+import { ReadinessConsole } from "@/components/landing/readiness-console";
+import { CAREERS } from "@/lib/career-readiness";
+
+const nav = [
+  ["The map", "#map"],
+  ["How it works", "#how"],
+  ["Demo", "/demo"]
+] as const;
+
+const proofs = ["Self-assessed, not guessed", "A score you can explain", "Private to your account"];
 
 const steps = [
-  { number: "01", title: "Build your student record", copy: "Bring your academic details and skills into one profile. Set a target career when you’re ready." },
-  { number: "02", title: "See the skill difference", copy: "Compare your self-assessed proficiency with the target role’s weighted requirements. Every score has a clear reason." },
-  { number: "03", title: "Keep the proof and progress", copy: "Add projects to your semester journey. Use specific next steps to turn a gap into something you can show." },
-];
+  {
+    number: "01",
+    title: "Add your student record",
+    copy: "Your degree, semester and the skills you already use. Everything starts from what you know today."
+  },
+  {
+    number: "02",
+    title: "Choose a target career",
+    copy: "Pick one of ten career maps. Every required skill shows its expected level and how much weight it carries."
+  },
+  {
+    number: "03",
+    title: "Build the weighted gap",
+    copy: "The roadmap ranks gaps by weight. Add a project as proof, then watch readiness recalculate."
+  }
+] as const;
 
-const features = [
-  { icon: Target, title: "A score you can explain", text: "Readiness is a weighted comparison of your proficiency and each role’s expected level. No hidden AI score." },
-  { icon: Layers3, title: "Skills with context", text: "See what is matched, in progress or missing, then link your skills to project evidence." },
-  { icon: Compass, title: "Your journey, by semester", text: "Keep a chronological record of projects and the tools you used, in one place." },
-];
+const formulaRows = [
+  ["SQL", "25% × 2/3", "16.7"],
+  ["Statistics", "20% × 1/3", "6.7"],
+  ["Python", "15% × 0/2", "0.0"]
+] as const;
 
-function ReadinessPreview() {
-  return <div aria-label="Sample career readiness for a Data Analyst" className="relative mx-auto w-full max-w-[520px]">
-    <div aria-hidden="true" className="absolute inset-x-[12%] top-[13%] h-[72%] rotate-[-7deg] rounded-[28px] border border-[var(--landing-line)] bg-[var(--landing-paper-deep)] shadow-[0_22px_50px_-34px_rgba(25,30,27,.45)]" />
-    <div className="relative overflow-hidden rounded-[22px] border border-[var(--landing-line)] bg-[var(--landing-island-strong)] shadow-[0_32px_72px_-44px_rgba(20,25,21,.48)]">
-      <div className="flex items-center justify-between gap-3 border-b border-[var(--landing-line)] px-5 py-4"><div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl border border-[var(--landing-signal)]/25 bg-[var(--landing-signal)]/10 text-[var(--landing-signal)]"><GraduationCap className="h-4 w-4" /></span><div><p className="text-sm font-semibold text-[var(--landing-ink)]">CareerProfile</p><p className="mt-0.5 text-[11px] text-[var(--landing-muted)]">Student career map</p></div></div><span className="rounded-full border border-[var(--landing-line)] px-2.5 py-1 text-[10px] text-[var(--landing-muted)]">SAMPLE PROFILE</span></div>
-      <div className="grid gap-5 p-5 sm:grid-cols-[1fr_1.1fr] sm:p-6"><div><p className="text-xs text-[var(--landing-muted)]">Target career</p><h2 className="mt-1 font-display text-xl font-semibold tracking-tight text-[var(--landing-ink)]">Data Analyst</h2><div className="mt-5 flex items-center gap-4"><div className="grid h-[92px] w-[92px] shrink-0 place-items-center rounded-full" style={{ background: "conic-gradient(var(--landing-signal) 212deg, var(--landing-line) 0deg)" }}><div className="grid h-[78px] w-[78px] place-content-center rounded-full bg-[var(--landing-island-strong)] text-center"><strong className="font-display text-2xl leading-none text-[var(--landing-ink)]">59</strong><span className="mt-1 text-[10px] text-[var(--landing-muted)]">readiness</span></div></div><div className="space-y-2 text-xs text-[var(--landing-muted)]"><p className="flex items-center gap-2"><i className="h-2 w-2 rounded-full bg-[#6d9b74]" />2 matched</p><p className="flex items-center gap-2"><i className="h-2 w-2 rounded-full bg-[#d9935e]" />3 in progress</p><p className="flex items-center gap-2"><i className="h-2 w-2 rounded-full bg-[var(--line-ink)]" />1 to explore</p></div></div></div>
-        <div className="rounded-2xl border border-[var(--landing-line)] bg-[var(--landing-paper)] p-4"><div className="flex items-center justify-between"><p className="text-xs font-semibold text-[var(--landing-ink)]">Skill comparison</p><span className="font-mono text-[10px] text-[var(--landing-muted)]">WEIGHTED</span></div><div className="mt-3 space-y-3">{[["SQL", "Matched", 100], ["Statistics", "In progress", 33], ["Python", "To explore", 0]].map(([skill, status, width]) => <div key={String(skill)}><div className="flex justify-between gap-2 text-[11px]"><span className="font-medium text-[var(--landing-ink)]">{skill}</span><span className="text-[var(--landing-muted)]">{status}</span></div><div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[var(--landing-line)]"><div className="h-full rounded-full bg-[var(--landing-signal)]" style={{ width: `${width}%` }} /></div></div>)}</div><div className="mt-4 flex items-center gap-2 border-t border-[var(--landing-line)] pt-3 text-[11px] text-[var(--landing-muted)]"><Check className="h-3.5 w-3.5 text-[#6d9b74]" />One project linked as evidence</div></div>
-      </div><div className="flex items-center justify-between border-t border-[var(--landing-line)] px-5 py-3 font-mono text-[9px] tracking-[.08em] text-[var(--landing-muted)]"><span>PROFILE · 3RD YEAR</span><span>CAREER ATLAS / 01</span></div>
-    </div>
-  </div>;
-}
+const gaps = [
+  ["Python", "15%", "+15"],
+  ["Statistics", "20%", "+13"],
+  ["SQL", "25%", "+8"]
+] as const;
+
+const proficiency = ["Exploring", "Learning", "Practicing", "Confident"] as const;
+
+const faqs = [
+  {
+    question: "Is readiness a verified credential?",
+    answer:
+      "No. Readiness is a weighted summary of the skill levels you enter yourself. It is not an employment prediction and not a verified credential, which is why every score shows the requirements behind it."
+  },
+  {
+    question: "How is the score calculated?",
+    answer:
+      "For each requirement, its weight is multiplied by your proficiency divided by the expected proficiency, capped at the expected level. The contributions are summed and rounded. Missing skills count as zero."
+  },
+  {
+    question: "Who can see my profile and skills?",
+    answer:
+      "Only you. Supabase Auth identifies your account, and row-level security scopes profile, skill and project rows to their owner. There is no public profile and no admin verification in this version."
+  },
+  {
+    question: "Do I need to connect GitHub?",
+    answer:
+      "Not in this version. Projects are recorded manually and can include a URL. Automated repository syncing, certificates, internships and result uploads are not enabled yet."
+  }
+] as const;
 
 export function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const reduceMotion = useReducedMotion();
-  return <div id="top" className="landing-shell min-h-screen bg-[var(--landing-paper)] text-[var(--landing-ink)]">
-    <header className="landing-header sticky top-0 z-40 border-b border-[var(--landing-line)]"><div className="mx-auto flex h-[68px] max-w-[1280px] items-center justify-between px-5 sm:px-8">
-      <Link href="/" aria-label="CareerProfile home" className="inline-flex min-h-11 items-center gap-2.5"><Image src="/icon.svg" alt="" width={36} height={36} className="h-9 w-9 rounded-[10px] object-cover shadow-sm" /><span className="font-display text-[1.15rem] font-semibold tracking-[-.04em]">Career<span className="font-normal text-[var(--landing-signal)]">Profile</span></span></Link>
-      <nav aria-label="Main navigation" className="hidden items-center gap-1 md:flex"><a href="#how" className="rounded-full px-3 py-2 text-xs font-medium text-[var(--landing-muted)] hover:text-[var(--landing-ink)]">How it works</a><a href="#features" className="rounded-full px-3 py-2 text-xs font-medium text-[var(--landing-muted)] hover:text-[var(--landing-ink)]">What you can track</a><Link href="/demo" className="rounded-full px-3 py-2 text-xs font-medium text-[var(--landing-muted)] hover:text-[var(--landing-ink)]">Demo</Link></nav>
-      <div className="flex items-center gap-2"><ThemeToggle /><Button asChild size="sm" variant="secondary" className="hidden rounded-full px-4 sm:inline-flex"><Link href="/login">Sign in</Link></Button><Button asChild size="sm" className="hidden rounded-full px-4 sm:inline-flex"><Link href="/signup">Create profile <ArrowRight className="h-3.5 w-3.5" /></Link></Button><button type="button" aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)} className="grid h-10 w-10 place-items-center rounded-full border border-[var(--landing-line)] md:hidden">{menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}</button></div>
-    </div>{menuOpen && <nav aria-label="Mobile navigation" className="grid gap-1 border-t border-[var(--landing-line)] bg-[var(--landing-paper)] p-4 md:hidden"><a onClick={() => setMenuOpen(false)} className="min-h-11 rounded-xl px-3 py-3 text-sm" href="#how">How it works</a><a onClick={() => setMenuOpen(false)} className="min-h-11 rounded-xl px-3 py-3 text-sm" href="#features">What you can track</a><Link onClick={() => setMenuOpen(false)} className="min-h-11 rounded-xl px-3 py-3 text-sm" href="/demo">Explore the demo</Link><Link onClick={() => setMenuOpen(false)} className="min-h-11 rounded-xl px-3 py-3 text-sm font-semibold" href="/login">Sign in</Link><Link onClick={() => setMenuOpen(false)} className="min-h-11 rounded-xl px-3 py-3 text-sm font-semibold text-[var(--landing-signal)]" href="/signup">Create profile</Link></nav>}</header>
+  const [scrolled, setScrolled] = useState(false);
 
-    <main id="main-content">
-      <section className="landing-hero relative overflow-hidden" aria-labelledby="hero-heading"><div className="landing-wrap grid min-h-[650px] items-center gap-12 py-14 lg:grid-cols-[.92fr_1.08fr] lg:py-20"><motion.div initial={reduceMotion ? undefined : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .45 }}><p className="landing-overline"><i aria-hidden="true" /> A CAREER MAP FOR STUDENTS</p><h1 id="hero-heading" className="mt-5 max-w-[11ch] font-display text-[clamp(3rem,7vw,5.8rem)] font-semibold leading-[.96] tracking-[-.065em]">See where you stand.<br /><em className="font-normal text-[var(--landing-signal)]">Know what’s next.</em></h1><p className="landing-hero-copy mt-6 max-w-[50ch]">Bring your academic profile, skills and projects together. Choose a career, see how your skills compare, and turn the gaps into a practical next step.</p><p className="landing-hero-activation mt-4">Clear skill requirements · transparent readiness · your progress by semester</p><div className="landing-actions mt-7"><Button asChild className="h-12 rounded-full bg-[var(--landing-signal)] px-6 text-white shadow-[0_10px_24px_rgba(182,83,39,0.2)] hover:bg-[var(--landing-signal-dark)]"><Link href="/signup">Build your profile <ArrowRight className="h-4 w-4" /></Link></Button><Link href="/demo" className="landing-text-link"><BookOpenCheck className="h-4 w-4" /> Explore the demo</Link></div><div className="landing-proof-row mt-5"><span><Check aria-hidden="true" /> Your skills stay yours</span><span><Check aria-hidden="true" /> No hidden readiness score</span></div></motion.div><motion.div initial={reduceMotion ? undefined : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .5, delay: .06 }}><ReadinessPreview /></motion.div></div></section>
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-      <div className="landing-wrap landing-platform-rail" aria-label="Career profile contents"><span className="landing-rail-label">YOUR CAREER ATLAS</span><div className="landing-platforms"><span><i className="platform-dot" style={{ background: "var(--landing-signal)" }} /> Skills</span><span><i className="platform-dot" style={{ background: "#79947d" }} /> Projects</span><span><i className="platform-dot" style={{ background: "#b7925f" }} /> Journey</span></div><span className="landing-rail-label landing-rail-right">BUILT AROUND YOU</span></div>
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
 
-      <section id="how" className="landing-section landing-section-rule" aria-labelledby="how-heading"><div className="landing-wrap grid gap-10 lg:grid-cols-[.78fr_1.22fr]"><div className="landing-section-intro"><p className="landing-section-label">FROM PROFILE TO PLAN</p><h2 id="how-heading">Make the next step easier to see.</h2><p>Your target career gives the work ahead a shape. Your own projects and skills show how far you’ve come.</p></div><div className="grid gap-3 sm:grid-cols-3">{steps.map((step) => <article key={step.number} className="rounded-2xl border border-[var(--landing-line)] bg-[var(--landing-island-strong)] p-5"><p className="font-mono text-xs text-[var(--landing-signal)]">{step.number}</p><h3 className="mt-5 font-display text-lg font-semibold leading-tight tracking-tight">{step.title}</h3><p className="mt-2 text-sm leading-6 text-[var(--landing-muted)]">{step.copy}</p></article>)}</div></div></section>
+  return (
+    <div id="top" className="aurora-shell aurora-page">
+      <AuroraBackdrop />
 
-      <section id="features" className="landing-section landing-section-quiet" aria-labelledby="features-heading"><div className="landing-wrap"><div className="landing-section-heading-row"><div><p className="landing-section-label">BUILT FOR YOUR STUDENT JOURNEY</p><h2 id="features-heading">Keep the signal. Keep the proof.</h2></div><Link href="/demo" className="landing-text-link">See the sample <ArrowUpRight className="h-4 w-4" /></Link></div><div className="landing-feature-grid">{features.map(({ icon: Icon, title, text }) => <article key={title} className="landing-feature"><Icon aria-hidden="true" className="h-5 w-5 text-[var(--landing-signal)]" /><h3>{title}</h3><p>{text}</p></article>)}</div></div></section>
+      <header className={`aurora-header ${scrolled ? "aurora-header-scrolled" : ""}`}>
+        <div className="flex h-16 items-center justify-between gap-2 pr-2 pl-3">
+          <Link href="/" aria-label="CareerProfile home" className="inline-flex min-h-11 items-center">
+            <BrandMark />
+          </Link>
 
-      <section className="landing-wrap py-10 sm:py-16"><div className="signal-receipt"><div className="signal-receipt-header"><span>READINESS RECEIPT</span><span>SAMPLE CAREER · DATA ANALYST</span></div><div className="signal-receipt-grid"><div><p className="signal-board-kicker">HOW IT WORKS</p><h2>Every point has<br /><em>a reason.</em></h2><p className="signal-receipt-copy">The score compares your proficiency with the expected level, multiplied by that skill’s career weight. Missing requirements count as zero until you add them.</p></div><div className="signal-receipt-data"><div><span>YOUR PROFICIENCY</span><strong>Learning</strong></div><div><span>EXPECTED LEVEL</span><strong>Practicing</strong></div><div><span>CAREER WEIGHT</span><strong>20%</strong></div><div className="signal-receipt-link">Update your skills to recalculate <ArrowRight aria-hidden="true" /></div></div></div></div></section>
+          <nav aria-label="Main navigation" className="hidden items-center gap-0.5 md:flex">
+            {nav.map(([label, href]) =>
+              href.startsWith("#") ? (
+                <a key={label} href={href} className="aurora-nav-link">{label}</a>
+              ) : (
+                <Link key={label} href={href} className="aurora-nav-link">{label}</Link>
+              )
+            )}
+          </nav>
 
-      <section className="landing-closing" aria-labelledby="closing-heading"><div className="landing-wrap landing-closing-inner"><p className="landing-overline"><i aria-hidden="true" /> YOUR NEXT STEP STARTS HERE</p><h2 id="closing-heading">A clear picture<br /><em>of what to build next.</em></h2><p>Start with the skills you have, choose a career to explore, and add proof as you go.</p><div className="landing-actions landing-actions-centered"><Button asChild className="h-12 rounded-full bg-[var(--landing-signal)] px-6 text-white hover:bg-[var(--landing-signal-dark)]"><Link href="/signup">Create your profile <ArrowRight className="h-4 w-4" /></Link></Button><Button asChild variant="secondary" className="h-12 rounded-full border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white"><Link href="/demo"><BookOpenCheck className="h-4 w-4" /> Preview the demo</Link></Button></div><p className="landing-privacy-note">Skill levels are self-reported. Repository imports and result uploads are not enabled yet.</p></div></section>
-    </main>
-    <LandingMobileDock />
-  </div>;
+          <div className="flex items-center gap-1.5">
+            <ThemeToggle />
+            <Link href="/login" className="hidden min-h-11 items-center rounded-full px-3 text-sm font-medium text-mutedText transition-colors hover:text-ink sm:inline-flex">
+              Sign in
+            </Link>
+            <Link href="/signup" className="aurora-cta hidden !min-h-10 !px-4 text-[0.82rem] sm:inline-flex">
+              Build your profile
+            </Link>
+            <button
+              aria-controls="mobile-menu"
+              aria-expanded={menuOpen}
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              className="grid h-11 w-11 place-items-center rounded-full border border-[var(--aurora-glass-edge)] text-ink md:hidden"
+              onClick={() => setMenuOpen((open) => !open)}
+              type="button"
+            >
+              {menuOpen ? <X aria-hidden="true" className="h-4 w-4" /> : <Menu aria-hidden="true" className="h-4 w-4" />}
+            </button>
+          </div>
+        </div>
+
+        {menuOpen && (
+          <div id="mobile-menu" className="aurora-menu-panel mx-1.5 mb-1.5 grid gap-0.5 p-2 md:hidden">
+            {nav.map(([label, href]) =>
+              href.startsWith("#") ? (
+                <a key={label} href={href} className="aurora-menu-link" onClick={() => setMenuOpen(false)}>{label}</a>
+              ) : (
+                <Link key={label} href={href} className="aurora-menu-link" onClick={() => setMenuOpen(false)}>{label}</Link>
+              )
+            )}
+            <div className="my-1 h-px bg-[var(--aurora-glass-edge)]" />
+            <Link href="/login" className="aurora-menu-link" onClick={() => setMenuOpen(false)}>Sign in</Link>
+            <Link href="/signup" className="aurora-cta mt-1 w-full" onClick={() => setMenuOpen(false)}>
+              Build your profile <ArrowRight aria-hidden="true" className="h-4 w-4" />
+            </Link>
+          </div>
+        )}
+      </header>
+
+      <main id="main-content" className="relative z-10">
+        <section className="aurora-hero" aria-labelledby="hero-heading">
+          <div className="aurora-wrap">
+            <motion.div
+              animate={{ opacity: 1, y: 0 }}
+              className="aurora-hero-copy"
+              initial={{ opacity: 0, y: 14 }}
+              transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <span className="aurora-pill">
+                <span aria-hidden="true" className="aurora-pill-mark" />
+                A career map for students
+              </span>
+              <h1 className="aurora-display mt-6" id="hero-heading">
+                See where your skills stand.
+                <br />
+                <span className="aurora-gradient-text">Know what to build next.</span>
+              </h1>
+              <p className="aurora-subhead">
+                Bring your academic record, skills and projects into one private map. Choose a career to explore and see the gap as a weighted, explainable score — not a guess.
+              </p>
+              <div className="aurora-hero-actions">
+                <Link href="/signup" className="aurora-cta">
+                  Build your profile <ArrowRight aria-hidden="true" className="h-4 w-4" />
+                </Link>
+                <Link href="/demo" className="aurora-cta-ghost">
+                  <Compass aria-hidden="true" className="h-4 w-4" /> Explore the sample map
+                </Link>
+              </div>
+              <div className="aurora-proof-row">
+                {proofs.map((proof) => (
+                  <span key={proof}><Check aria-hidden="true" /> {proof}</span>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div
+              animate={{ opacity: 1, y: 0 }}
+              className="aurora-console-wrap"
+              initial={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.7, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <ReadinessConsole />
+            </motion.div>
+
+            <div className="mt-7">
+              <p className="text-center text-xs text-faintText">Ten career maps, from Data Analyst to UI/UX Designer.</p>
+              <div className="aurora-role-rail">
+                {CAREERS.map((career) => (
+                  <span key={career.id} className="aurora-role-chip">
+                    <i aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+                    {career.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="aurora-section aurora-section-rule scroll-mt-28" id="map" aria-labelledby="map-heading">
+          <div className="aurora-wrap">
+            <div className="aurora-section-head">
+              <p className="aurora-kicker">The career map</p>
+              <h2 className="aurora-heading mt-4" id="map-heading">Not a scoreboard. A map of what to build next.</h2>
+              <p className="aurora-subhead">
+                CareerProfile keeps the parts of your record that matter to a role, then shows how far each one is from the expected level. The score is arithmetic, not a model.
+              </p>
+            </div>
+
+            <div className="aurora-bento">
+              <SpotlightCard className="aurora-bento-3 aurora-bento-cell">
+                <div className="flex items-start justify-between gap-3">
+                  <span className="aurora-icon-tile"><Sigma aria-hidden="true" /></span>
+                  <span className="aurora-chip">Explainable</span>
+                </div>
+                <h3 className="aurora-bento-title">Every point has a reason</h3>
+                <p className="aurora-bento-copy">
+                  A skill&apos;s weight is multiplied by how close your proficiency is to the expected level, capped at that level. Missing skills count as zero.
+                </p>
+                <div className="mt-5 border-t border-[var(--aurora-glass-edge)]">
+                  {formulaRows.map(([skill, formula, points]) => (
+                    <div key={skill} className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[var(--aurora-glass-edge)] py-2.5 text-xs">
+                      <span className="font-semibold text-ink">{skill}</span>
+                      <span className="font-mono text-faintText">{formula}</span>
+                      <span className="font-mono text-ink">{points} pts</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-3 text-[11px] leading-5 text-faintText">The same inputs always produce the same total.</p>
+              </SpotlightCard>
+
+              <SpotlightCard className="aurora-bento-3 aurora-bento-cell">
+                <div className="flex items-start justify-between gap-3">
+                  <span className="aurora-icon-tile"><TrendingUp aria-hidden="true" /></span>
+                  <span className="aurora-chip">Ranked by weight</span>
+                </div>
+                <h3 className="aurora-bento-title">Start where the weight is</h3>
+                <p className="aurora-bento-copy">
+                  Next steps follow the weighted distance to the role, so a high-weight gap never hides behind a long generic checklist.
+                </p>
+                <div className="mt-5 grid gap-2">
+                  {gaps.map(([skill, weight, lift], index) => (
+                    <div key={skill} className="flex items-center gap-3 rounded-xl border border-[var(--aurora-glass-edge)] bg-[color-mix(in_srgb,var(--surface)_30%,transparent)] px-3 py-2.5">
+                      <span className="font-mono text-[10px] text-faintText">0{index + 1}</span>
+                      <span className="min-w-0 flex-1 truncate text-sm font-medium text-ink">{skill}</span>
+                      <span className="font-mono text-[10px] text-faintText">{weight} weight</span>
+                      <span className="rounded-md bg-[var(--accent-soft)] px-1.5 py-0.5 font-mono text-[10px] text-primary">{lift} pts</span>
+                    </div>
+                  ))}
+                </div>
+              </SpotlightCard>
+
+              <SpotlightCard className="aurora-bento-2 aurora-bento-cell">
+                <span className="aurora-icon-tile"><Layers3 aria-hidden="true" /></span>
+                <h3 className="aurora-bento-title">A level, not a percentage</h3>
+                <p className="aurora-bento-copy">Four plain levels keep self-assessment honest.</p>
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {proficiency.map((level) => (
+                    <span key={level} className="aurora-chip">{level}</span>
+                  ))}
+                </div>
+              </SpotlightCard>
+
+              <SpotlightCard className="aurora-bento-2 aurora-bento-cell">
+                <span className="aurora-icon-tile"><CalendarRange aria-hidden="true" /></span>
+                <h3 className="aurora-bento-title">Your journey, by semester</h3>
+                <p className="aurora-bento-copy">Projects stay in the term they belong to, so progress has context.</p>
+                <div className="mt-4 space-y-2 border-l border-[var(--aurora-glass-edge)] pl-3">
+                  <div>
+                    <p className="font-mono text-[10px] text-primary">SEMESTER 4 · 2025</p>
+                    <p className="mt-0.5 text-xs text-mutedText">Course planner API</p>
+                  </div>
+                  <div>
+                    <p className="font-mono text-[10px] text-primary">SEMESTER 5 · 2026</p>
+                    <p className="mt-0.5 text-xs text-mutedText">Sales dashboard</p>
+                  </div>
+                </div>
+              </SpotlightCard>
+
+              <SpotlightCard className="aurora-bento-2 aurora-bento-cell">
+                <span className="aurora-icon-tile"><FolderKanban aria-hidden="true" /></span>
+                <h3 className="aurora-bento-title">Proof you can show</h3>
+                <p className="aurora-bento-copy">Record the project, the tools and an optional link.</p>
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  <span className="aurora-chip aurora-chip-strong">SQL</span>
+                  <span className="aurora-chip">Python</span>
+                  <span className="aurora-chip">Statistics</span>
+                  <span className="aurora-chip">Figma</span>
+                </div>
+              </SpotlightCard>
+
+              <SpotlightCard className="aurora-bento-2 aurora-bento-cell">
+                <span className="aurora-icon-tile"><LockKeyhole aria-hidden="true" /></span>
+                <h3 className="aurora-bento-title">Private by default</h3>
+                <p className="aurora-bento-copy">
+                  Row-level security scopes profile, skill and project rows to your account. Nothing is shared publicly.
+                </p>
+                <span className="aurora-chip mt-4">Owner-only rows</span>
+              </SpotlightCard>
+
+              <SpotlightCard className="aurora-bento-4 aurora-bento-cell">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <span className="aurora-icon-tile"><Target aria-hidden="true" /></span>
+                  <span className="aurora-chip">10 defined profiles</span>
+                </div>
+                <h3 className="aurora-bento-title">One record, ten directions</h3>
+                <p className="aurora-bento-copy">
+                  Each profile carries its own expected levels and weights, so the same skills can read differently for two roles.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {CAREERS.map((career) => (
+                    <span key={career.id} className="aurora-chip">{career.name}</span>
+                  ))}
+                </div>
+              </SpotlightCard>
+            </div>
+          </div>
+        </section>
+
+        <section className="aurora-section aurora-section-rule scroll-mt-28" id="how" aria-labelledby="how-heading">
+          <div className="aurora-wrap">
+            <div className="aurora-section-head">
+              <p className="aurora-kicker">How it works</p>
+              <h2 className="aurora-heading mt-4" id="how-heading">Three steps, in order.</h2>
+              <p className="aurora-subhead">Start with what you have. The map tells you what is missing, not what you should already be.</p>
+            </div>
+            <div className="aurora-steps">
+              {steps.map((step) => (
+                <article key={step.number} className="aurora-step">
+                  <p className="aurora-step-number">{step.number}</p>
+                  <h3 className="aurora-step-title">{step.title}</h3>
+                  <p className="aurora-step-copy">{step.copy}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="aurora-section" aria-labelledby="demo-heading">
+          <div className="aurora-wrap">
+            <div className="aurora-glass aurora-demo-band">
+              <div>
+                <p className="aurora-kicker">No account needed</p>
+                <h2 className="aurora-heading mt-3 text-[clamp(1.8rem,3.4vw,2.8rem)]" id="demo-heading">Try the map before you sign up.</h2>
+                <p className="aurora-subhead">
+                  A sample student record, all ten career profiles and a live comparison. Change the target career. Nothing you touch is saved.
+                </p>
+                <Link href="/demo" className="aurora-cta mt-6">
+                  Open the sample map <ArrowUpRight aria-hidden="true" className="h-4 w-4" />
+                </Link>
+              </div>
+              <div className="grid grid-cols-3 gap-2.5">
+                {[
+                  ["10", "career profiles"],
+                  ["4", "skill levels"],
+                  ["0", "changes saved"]
+                ].map(([value, label]) => (
+                  <div key={label} className="rounded-xl border border-[var(--aurora-glass-edge)] bg-[color-mix(in_srgb,var(--surface)_32%,transparent)] p-3">
+                    <p className="font-display text-2xl font-semibold tracking-[-0.04em] text-ink">{value}</p>
+                    <p className="mt-1 text-[11px] leading-4 text-mutedText">{label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="aurora-section aurora-section-rule" aria-labelledby="faq-heading">
+          <div className="aurora-wrap grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
+            <div className="aurora-section-head">
+              <p className="aurora-kicker">Straight answers</p>
+              <h2 className="aurora-heading mt-4" id="faq-heading">What the score is, and is not.</h2>
+              <p className="aurora-subhead">If a number cannot explain itself here, it should not be on the page.</p>
+            </div>
+            <div className="aurora-faq">
+              {faqs.map((faq) => (
+                <details key={faq.question}>
+                  <summary>
+                    {faq.question}
+                    <span aria-hidden="true"><Plus className="h-3.5 w-3.5" /></span>
+                  </summary>
+                  <p>{faq.answer}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section
+          className="aurora-closing"
+          style={{ background: "radial-gradient(70% 90% at 50% 110%, var(--accent-soft), transparent 70%)" }}
+          aria-labelledby="closing-heading"
+        >
+          <div className="aurora-wrap-narrow">
+            <span className="aurora-pill">
+              <span aria-hidden="true" className="aurora-pill-mark" />
+              Start with your record
+            </span>
+            <h2 className="aurora-heading mt-6" id="closing-heading">
+              A clearer next step starts with <span className="aurora-gradient-text">what you already know.</span>
+            </h2>
+            <p className="aurora-subhead">
+              Create a private profile, choose a career to explore, and let the weighted gaps point to the next thing worth building.
+            </p>
+            <div className="aurora-hero-actions">
+              <Link href="/signup" className="aurora-cta">
+                Create your profile <ArrowRight aria-hidden="true" className="h-4 w-4" />
+              </Link>
+              <Link href="/demo" className="aurora-cta-ghost">
+                <BookOpenCheck aria-hidden="true" className="h-4 w-4" /> Preview the demo
+              </Link>
+            </div>
+            <p className="mt-5 text-[11px] leading-5 text-faintText">
+              Skill levels are self-reported. Readiness is not verified and does not predict employment.
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <LandingMobileDock />
+    </div>
+  );
 }

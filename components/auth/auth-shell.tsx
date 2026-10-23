@@ -1,38 +1,64 @@
 import Link from "next/link";
-import Image from "next/image";
-import { Sparkles } from "lucide-react";
+import { Check, Compass } from "lucide-react";
 import { AuthBackground } from "@/components/auth/auth-background";
 import { ThemeToggle } from "@/components/providers/theme-toggle";
+import { BrandMark } from "@/components/ui/brand-mark";
+import { ScoreRing } from "@/components/ui/score-ring";
 
 export function AuthShell({ children, title, description }: { children: React.ReactNode; title: string; description: string }) {
   return (
-    <main id="main-content" className="relative isolate grid min-h-screen place-items-center overflow-hidden bg-background p-4 sm:p-8">
+    <main id="main-content" className="aurora-shell aurora-auth">
       <AuthBackground />
-      <div className="absolute right-4 top-4 z-20 sm:right-8 sm:top-8"><ThemeToggle /></div>
-      <div className="relative z-10 grid w-full max-w-5xl items-center gap-10 lg:grid-cols-[1fr_420px]">
-        <div className="hidden max-w-lg lg:block">
-          <p className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-accent-soft px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary"><Sparkles aria-hidden="true" className="h-3.5 w-3.5" /> Student career map</p>
-          <p className="mt-6 text-balance font-display text-6xl font-medium leading-[0.98] tracking-tight text-ink">Know your skills.<br /><em className="italic text-primary">Choose your next step.</em></p>
-          <p className="mt-6 max-w-md text-base leading-relaxed text-mutedText">Bring your academic profile, target career and projects into a clear view of where you are and what to build next.</p>
-          <div className="mt-8 flex items-center gap-3 text-xs text-mutedText"><span className="h-2 w-2 rounded-full bg-success" /> Explainable readiness <span className="h-px w-10 bg-borderSoft" /> Your profile stays yours</div>
-        </div>
-        <section className="w-full rounded-[20px] border border-borderSoft/80 bg-card/90 p-4 shadow-glass backdrop-blur-xl sm:p-5 max-h-[calc(100vh-2rem)] overflow-y-auto">
-          <Link aria-label="CareerProfile home" className="inline-flex items-center gap-2" href="/">
-            <Image src="/icon.svg" alt="" width={28} height={28} className="h-7 w-7 rounded-lg object-cover ring-1 ring-black/5" />
-            <span className="font-display text-base font-semibold tracking-tight text-ink">Career<em className="font-normal text-primary">Profile</em></span>
+      <div className="absolute right-3 top-3 z-20 sm:right-6 sm:top-6">
+        <ThemeToggle />
+      </div>
+
+      <div className="aurora-auth-grid">
+        <div className="aurora-auth-story hidden lg:block">
+          <Link href="/" aria-label="CareerProfile home" className="inline-flex min-h-11 items-center">
+            <BrandMark />
           </Link>
-          <h1 className="mt-4 font-heading text-xl font-medium tracking-tight text-ink">{title}</h1>
-          <p className="mt-1 text-xs leading-4 text-mutedText">{description}</p>
+          <p className="aurora-kicker mt-10">A career map for students</p>
+          <p className="aurora-heading mt-4 text-[clamp(2.3rem,3.6vw,3.3rem)]">
+            Know your skills.
+            <br />
+            <span className="aurora-gradient-text">Choose the next step.</span>
+          </p>
+          <p className="aurora-subhead">
+            Bring your academic record, target career and projects into one private view of where you are and what to build next.
+          </p>
+
+          <div className="mt-7 flex items-center gap-5">
+            <ScoreRing id="auth" score={63} size={112} strokeWidth={8} />
+            <div className="min-w-0">
+              <p className="aurora-label">Explainable readiness</p>
+              <p className="mt-1 max-w-[26ch] text-xs leading-5 text-mutedText">
+                Weight times proficiency over the expected level. No hidden model, no invented metrics.
+              </p>
+              <div className="mt-3 grid gap-1.5 text-xs text-mutedText">
+                <span className="inline-flex items-center gap-2"><Check aria-hidden="true" className="h-3.5 w-3.5 text-primary" /> Private, owner-only rows</span>
+                <span className="inline-flex items-center gap-2"><Compass aria-hidden="true" className="h-3.5 w-3.5 text-primary" /> Ten careers to compare</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <section aria-labelledby="auth-title" className="aurora-glass aurora-auth-card">
+          <Link href="/" aria-label="CareerProfile home" className="aurora-auth-brand">
+            <BrandMark />
+          </Link>
+          <h1 className="aurora-auth-title" id="auth-title">{title}</h1>
+          <p className="aurora-auth-desc">{description}</p>
           {children}
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-2 border-t border-borderSoft pt-3 text-[10px] text-mutedText">
-            <Link href="/privacy" className="font-medium text-primary hover:underline">
-              Privacy & Data Security
+          <div className="aurora-auth-links">
+            <Link href="/privacy" className="inline-flex min-h-11 items-center font-medium text-primary hover:underline">
+              Privacy and data
             </Link>
-            <span className="h-3 w-px bg-borderSoft" />
-            <Link href="/demo" className="font-medium text-primary hover:underline">
-              Explore Live Demo
+            <span aria-hidden="true" className="h-3 w-px bg-[var(--aurora-glass-edge)]" />
+            <Link href="/demo" className="inline-flex min-h-11 items-center font-medium text-primary hover:underline">
+              Explore the demo
             </Link>
-            <span className="hidden sm:inline text-faintText">· Private student profile · Transparent scoring</span>
+            <span className="hidden w-full text-center text-[10px] text-faintText sm:block">Private student profile · Transparent scoring</span>
           </div>
         </section>
       </div>

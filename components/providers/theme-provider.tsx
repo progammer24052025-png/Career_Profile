@@ -50,7 +50,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", resolvedTheme === "dark");
+    // Suppress colour transitions for the swap, flush styles once, then restore
+    // them. Without this every glass surface smears between themes at once.
+    const root = document.documentElement;
+    root.classList.add("theme-switching");
+    root.classList.toggle("dark", resolvedTheme === "dark");
+    void root.offsetWidth;
+    const restore = () => root.classList.remove("theme-switching");
+    const frame = window.requestAnimationFrame(() => window.requestAnimationFrame(restore));
+    // Background tabs may never paint a frame; the timer keeps the class from
+    // sticking and locking every transition off.
+    const timer = window.setTimeout(restore, 200);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
   }, [resolvedTheme]);
 
   useEffect(() => {

@@ -15,7 +15,7 @@ const config = {
   reset: { action: updatePassword, submit: "Update password", helper: "", link: "/login", linkLabel: "Back to sign in" }
 } as const;
 
-const inputClass = "mt-1.5 h-9 w-full rounded-xl border border-borderSoft bg-surface px-3 text-sm text-ink outline-none transition-[border-color,box-shadow] focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40";
+const inputClass = "aurora-input";
 
 export function AuthForm({ mode, next }: { mode: Mode; next?: string }) {
   const details = config[mode];
@@ -57,7 +57,7 @@ export function AuthForm({ mode, next }: { mode: Mode; next?: string }) {
   const strengthColor = ["bg-transparent", "bg-danger", "bg-warning", "bg-warning", "bg-success", "bg-success"][strength] ?? "bg-transparent";
 
   return (
-    <form ref={formRef} action={formAction} className="mt-3 space-y-2.5">
+    <form ref={formRef} action={formAction} className="mt-4 space-y-3">
       {next && <input name="next" type="hidden" value={next} />}
       {hasName && (
         <label className="block text-sm font-medium text-mutedText">
@@ -98,7 +98,7 @@ export function AuthForm({ mode, next }: { mode: Mode; next?: string }) {
             <button
               aria-label={showPassword ? "Hide password" : "Show password"}
               aria-pressed={showPassword}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-faintText transition hover:text-ink"
+              className="absolute right-0.5 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-lg text-faintText transition hover:text-ink"
               onClick={() => setShowPassword((visible) => !visible)}
               type="button"
             >
@@ -145,7 +145,7 @@ export function AuthForm({ mode, next }: { mode: Mode; next?: string }) {
             <button
               aria-label={showConfirm ? "Hide password" : "Show password"}
               aria-pressed={showConfirm}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-faintText transition hover:text-ink"
+              className="absolute right-0.5 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-lg text-faintText transition hover:text-ink"
               onClick={() => setShowConfirm((visible) => !visible)}
               type="button"
             >
@@ -165,13 +165,13 @@ export function AuthForm({ mode, next }: { mode: Mode; next?: string }) {
         </label>
       )}
       {mode === "login" && (
-        <Link className="block text-right text-sm font-medium text-primary hover:underline" href="/forgot-password">
+        <Link className="inline-flex min-h-11 w-full items-center justify-end text-sm font-medium text-primary hover:underline" href="/forgot-password">
           Forgot password?
         </Link>
       )}
       {state.error && <p role="alert" className="rounded-xl border border-danger/30 bg-danger/10 p-3 text-sm text-danger">{state.error}</p>}
       {state.message && <p role="status" className="rounded-xl border border-success/30 bg-success/10 p-3 text-sm text-success">{state.message}</p>}
-      <Button className="w-full h-9 text-sm" disabled={pending} type="submit">
+      <Button className="w-full" disabled={pending} type="submit">
         {pending && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />}
         {details.submit}
       </Button>
@@ -185,7 +185,7 @@ export function AuthForm({ mode, next }: { mode: Mode; next?: string }) {
       {mode === "signup" && (
         <Link
           href="/demo"
-          className="flex items-center justify-center gap-1.5 rounded-xl border border-warning/20 bg-warning/10 px-3 py-2.5 text-xs font-medium text-warning transition hover:bg-warning/15"
+          className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-warning/20 bg-warning/10 px-3 py-2.5 text-xs font-medium text-warning transition hover:bg-warning/15"
         >
           <Eye aria-hidden="true" className="h-3.5 w-3.5" /> Explore Live Demo — no signup required
         </Link>

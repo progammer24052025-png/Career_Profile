@@ -4,6 +4,20 @@ CareerProfile helps students organize their academic profile, skills, and projec
 
 Readiness scores are weighted summaries of the student's own skill entries. They are not verified credentials or predictions of employment outcomes.
 
+## Screenshots
+
+| Landing page | Readiness console |
+| --- | --- |
+| ![Landing hero in dark theme: "See where your skills stand. Know what to build next."](docs/screenshots/landing-hero-dark.png) | ![Readiness console with weighted skill comparison and largest gap](docs/screenshots/landing-console-dark.png) |
+
+| Landing page, light theme | Demo page |
+| --- | --- |
+| ![Landing hero in light theme](docs/screenshots/landing-hero-light.png) | ![Career readiness demo with target career selector and score ring](docs/screenshots/demo-dark.png) |
+
+| Sign in | Landing on mobile | Demo on mobile |
+| --- | --- | --- |
+| ![Sign-in screen with explainable readiness panel](docs/screenshots/login-dark.png) | ![Landing page at 390px with mobile dock](docs/screenshots/landing-mobile-dark.png) | ![Demo page at 390px](docs/screenshots/demo-mobile-dark.png) |
+
 ## Features
 
 - Private student profile with academic details and target career.
